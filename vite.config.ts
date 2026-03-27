@@ -19,7 +19,7 @@ const languageConfig = {
 	enabled: true,
 	icon: 'languages',
 	showName: true,
-	availableLocales: ['en', 'de', 'ja', 'es', 'pt-br', 'ru', 'sk', 'th', 'zh-cn'],
+	availableLocales: ['en', 'de', 'es', 'pt-br', 'sk', 'ru', 'ja', 'th', 'zh-cn'],
 	defaultLocale: 'en',
 	autoDetect: true
 };
@@ -75,13 +75,13 @@ const siteConfigClient: Config = {
 				{
 					title: 'footer.ecosystem',
 					items: [
-						{ label: 'footer.repo', href: 'https://github.com/bchainhub/mota-dapp', target: '_blank' },
+						{ label: 'Repository', href: 'https://github.com/bchainhub/mota-dapp', target: '_blank' },
 					]
 				},
 				{
 					title: 'footer.contact',
 					items: [
-						{ label: 'footer.emailContact', to: 'mailto:support@mota.mota' }
+						{ label: 'Email', to: 'mailto:contact@blockchainhub.digital' }
 					]
 				}
 			],
