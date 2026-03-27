@@ -16,10 +16,10 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 // Language configuration: availableLocales as locale codes; names are read from each locale's language.descriptiveName in src/i18n
 const languageConfig = {
-	enabled: false,
+	enabled: true,
 	icon: 'languages',
-	showName: false,
-	availableLocales: ['en'],
+	showName: true,
+	availableLocales: ['en', 'de', 'ja', 'es', 'pt-br', 'ru', 'sk', 'th', 'zh-cn'],
 	defaultLocale: 'en',
 	autoDetect: true
 };
