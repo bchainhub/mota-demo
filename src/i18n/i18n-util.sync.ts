@@ -8,22 +8,28 @@ import { loadedFormatters, loadedLocales, locales } from './i18n-util'
 import de from './de'
 import en from './en'
 import es from './es'
+import fr from './fr'
+import it from './it'
 import ja from './ja'
 import pt_br from './pt-br'
 import ru from './ru'
 import sk from './sk'
 import th from './th'
+import vi from './vi'
 import zh_cn from './zh-cn'
 
 const localeTranslations = {
 	de,
 	en,
 	es,
+	fr,
+	it,
 	ja,
 	'pt-br': pt_br,
 	ru,
 	sk,
 	th,
+	vi,
 	'zh-cn': zh_cn,
 }
 

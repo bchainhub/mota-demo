@@ -14,11 +14,14 @@ export const locales: Locales[] = [
 	'de',
 	'en',
 	'es',
+	'fr',
+	'it',
 	'ja',
 	'pt-br',
 	'ru',
 	'sk',
 	'th',
+	'vi',
 	'zh-cn'
 ]
 

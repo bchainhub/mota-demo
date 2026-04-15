@@ -9,11 +9,14 @@ export type Locales =
 	| 'de'
 	| 'en'
 	| 'es'
+	| 'fr'
+	| 'it'
 	| 'ja'
 	| 'pt-br'
 	| 'ru'
 	| 'sk'
 	| 'th'
+	| 'vi'
 	| 'zh-cn'
 
 export type Translation = RootTranslation
