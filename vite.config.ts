@@ -1,13 +1,10 @@
-// @ts-expect-error
 import path from 'node:path';
-// @ts-expect-error
 import { fileURLToPath } from 'node:url';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import type { Config } from 'vite-plugin-config';
 import tailwindcss from '@tailwindcss/vite';
-import { resolveExtensionlessPlugin } from './src/lib/helpers/vite-resolve-extensionless';
 
 declare const process: { env: Record<string, string | undefined> };
 
@@ -19,7 +16,7 @@ const languageConfig = {
 	enabled: true,
 	icon: 'languages',
 	showName: true,
-	availableLocales: ['en', 'de', 'es', 'pt-br', 'sk', 'ru', 'ja', 'th', 'zh-cn'],
+	availableLocales: ['en', 'de', 'es', 'fr', 'it', 'ja', 'pt-br', 'ru', 'sk', 'th', 'vi', 'zh-cn'],
 	defaultLocale: 'en',
 	autoDetect: true
 };
@@ -53,7 +50,7 @@ const siteConfigClient: Config = {
 					label: 'navbar.home',
 					to: '/',
 					position: 'left',
-					icon: 'home'
+					icon: 'house'
 				},
 				{
 					href: 'https://github.com/bchainhub/dapp-starter',
@@ -97,8 +94,7 @@ const siteConfigClient: Config = {
 				},
 				{
 					label: 'footer.keyRegistry',
-					to: '/keys',
-					icon: 'key'
+					to: '/keys'
 				},
 				{
 					label: 'footer.poweredBy',
@@ -136,7 +132,6 @@ export default defineConfig({
 		}
 	},
 	plugins: [
-		resolveExtensionlessPlugin(),
 		tailwindcss(),
 		sveltekit(),
 		VitePWA({

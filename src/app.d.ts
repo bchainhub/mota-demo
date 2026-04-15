@@ -47,7 +47,15 @@ declare module 'vite-plugin-config' {
 				 * logo
 				 * @description Logo paths for light and dark theme, plus alt text.
 				 */
-				logo?: { src: string; srcDark?: string; alt?: string };
+				logo?: {
+					src: string;
+					srcDark?: string;
+					alt?: string;
+					/** When true, appends the site `title` brand segment only (text before the first `|`, trimmed) after the image inside the same home link. */
+					attachTitle?: boolean;
+					/** Tailwind/classes for the whole logo link (image + optional title), e.g. text color. */
+					className?: string;
+				};
 				/**
 				 * items
 				 * @description Nav items: use `to` for internal, `href` for external; action keys: manualConnect, disconnectWallet, signin, signout.
@@ -129,9 +137,9 @@ declare module 'vite-plugin-config' {
 			};
 			/**
 			 * metadata
-			 * @description HTML meta tags: name?, content, property? (for SEO, OG, etc.).
+			 * @description HTML `<meta>` tags (`name` / `property` + `content`) or `<link>` (`rel` + `href`).
 			 */
-			metadata?: { name?: string; content: string; property?: string }[];
+			metadata?: ({ name?: string; content: string; property?: string } | { rel?: string; href?: string })[];
 			/**
 			 * colorMode
 			 * @description Color / dark mode: default, toggle visibility, system preference.
