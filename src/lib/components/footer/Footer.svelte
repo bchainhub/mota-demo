@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { ArrowUpLeft, ArrowUpRight, ChevronRight } from 'lucide-svelte';
+	import { ArrowUpLeft, ArrowUpRight, ChevronRight } from '@lucide/svelte';
 	import { Icon, Tooltip } from '$components';
-	import { Key } from 'lucide-svelte';
+	import { Key } from '@lucide/svelte';
 	import { asDynamicIcon } from '$lib/helpers/icon';
-	import { LL } from '$lib/helpers/i18n';
-	import { t } from '$lib/helpers/i18n';
+	import { LL, t, torNot } from '$lib/helpers/i18n';
 	import { walletAddress } from '$modules/auth/web3';
 	import {
 		getAuthNavActions,
@@ -34,6 +33,21 @@
 	const authIn = $derived(Boolean(session?.user));
 	const showContext = $derived({ loggedIn: isLoggedIn, connected, authIn });
 	const authProviders = $derived(getAuthProviders(session, $walletAddress));
+
+	function authProviderLabel(provider: string): string {
+		if (provider.toLowerCase() === 'passkey') {
+			return torNot('content.footerExtras.brands.passkey', $LL) ?? 'Passkey';
+		}
+		return provider.charAt(0).toUpperCase() + provider.slice(1);
+	}
+
+	function disconnectLabel(): string {
+		return (
+			torNot('content.footerExtras.disconnectPasskey', $LL) ??
+			torNot('navbar.disconnect', $LL) ??
+			'Disconnect'
+		);
+	}
 
 	/** Filter by show only when auth enabled; otherwise show all. */
 	const visibleLinks = $derived(
@@ -174,6 +188,8 @@
 									{#if item.to}
 										<a
 											href={item.to}
+											target={item.target ? item.target : undefined}
+											rel={item.rel ? item.rel : undefined}
 											class="hover:text-primary-600 transition duration-150 inline-flex max-w-full min-w-0 flex-nowrap items-center gap-1 text-start whitespace-nowrap"
 										>
 											{#if item.icon}
@@ -250,6 +266,8 @@
 							{#if to}
 								<a
 									href={to}
+									target={target ? target : undefined}
+									rel={rel ? rel : undefined}
 									class="hover:text-footer-link-hover inline-flex max-w-full min-w-0 flex-nowrap items-center gap-1 {className ?? ''}"
 								>
 									{#if icon}
@@ -327,10 +345,10 @@
 										else authNavActions.signout();
 									}}
 								>
-									{provider.charAt(0).toUpperCase() + provider.slice(1)}
+									{authProviderLabel(provider)}
 								</button>
 								<svelte:fragment slot="content">
-									Disconnect {provider.charAt(0).toUpperCase() + provider.slice(1)}
+									{disconnectLabel()} {authProviderLabel(provider)}
 								</svelte:fragment>
 							</Tooltip>
 							{#if authProviders.indexOf(provider) < authProviders.length - 1}
