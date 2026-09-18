@@ -26,7 +26,8 @@
     "svelte-check": "^4.7.6",
     "tiged": "^2.12.8",
     "typescript": "^7.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.134.0"
   },
   "dependencies": {
     "@blockchainhub/blo": "^1.2.7",
