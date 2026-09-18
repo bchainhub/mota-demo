@@ -2,7 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import { ArrowUpLeft, ArrowUpRight, Eclipse, Menu, Moon, Sun, X } from 'lucide-svelte';
+	import { ArrowUpLeft, ArrowUpRight, Eclipse, Menu, Moon, Sun, X } from '@lucide/svelte';
 	import { ActionsDropdown, Icon, LanguageSwitcher, LanguageSwitcherCompact, Submenu, SubmenuCompact } from '$components';
 	import { asDynamicIcon } from '$lib/helpers/icon';
 	import { LL, locale as localeStore } from '$lib/helpers/i18n';
@@ -103,19 +103,25 @@
 		filterNavItemsByAuth(items as import('$lib/helpers/nav').ItemWithShow[], showContext, authEnabled) as NavbarItem[]
 	);
 
-	/** Display label for the user dropdown: wallet address or passkey session user; fallback to translated Account when no name. */
-	const userDropdownTitle = $derived(
-		$walletAddress ??
+	/** Display label for the user dropdown: wallet, Core ID, or passkey user fields. */
+	const userDropdownTitle = $derived.by((): string => {
+		if ($walletAddress) return $walletAddress;
+		const profileCoreId = (session?.user?.profile as { coreId?: string } | undefined)?.coreId?.trim();
+		if (profileCoreId) return profileCoreId;
+		return (
 			session?.user?.name ??
 			session?.user?.email ??
 			(session?.user?.id != null || session?.user?.userId != null
 				? String(session.user.id ?? session.user.userId).slice(0, 12) + '…'
 				: null) ??
 			t('common.account', $LL)
-	);
-	/** Format kind for shortFormat: Core Blockchain (wallet CorePass) = "core", other wallet = "wallet". */
+		);
+	});
+	/** Core IDs and Core ecosystem wallets use the Core short format. */
 	const userDropdownFormatKind = $derived.by((): ShortFormatKind => {
 		if ($walletAddress) return isCoreEcosystem($walletType) ? 'core' : 'wallet';
+		const profileCoreId = (session?.user?.profile as { coreId?: string } | undefined)?.coreId?.trim();
+		if (profileCoreId) return 'core';
 		return 'user';
 	});
 	/** Icon for dropdown: Wallet when connected, Key when logged in only. Wallet wins when both. */
@@ -148,25 +154,48 @@
 		const authItems = getAuthItemsFromConfig().filter(
 			(item) => evaluateShowRule(item.show, ctx)
 		);
-		const authMenuItems = authItems.map((item) => ({
+		const authMenuItems: MenuItem[] = authItems.map((item) => ({
 			label: item.label ? t(item.label, $LL) : '',
 			to: item.to,
+			href: item.href,
+			target: item.target as MenuItem['target'],
+			rel: item.rel,
 			className: item.className,
 			icon: item.icon,
-			action: item.to ? () => goto(item.to!) : undefined
+			action: item.action ? () => Promise.resolve(resolveAuthNavAction(item.action, authNavActions)?.()) : undefined
 		}));
-		const logoutItem = { label: t('common.logout', $LL), to: undefined as string | undefined, className: undefined as string | undefined, icon: undefined as string | undefined, action: () => Promise.resolve(authNavActions.signout()) };
-		const disconnectItem = { label: t('navbar.disconnect', $LL), to: undefined as string | undefined, className: undefined as string | undefined, icon: undefined as string | undefined, action: () => Promise.resolve(authNavActions.disconnect()) };
-		const dashboardItem = session?.user ? { label: t('content.dashboard.heading', $LL), to: '/dashboard', className: undefined as string | undefined, icon: undefined as string | undefined, action: () => goto('/dashboard') } : null;
-		const items = [...(dashboardItem ? [dashboardItem] : []), ...authMenuItems];
+		const logoutItem: MenuItem = {
+			label: t('common.logout', $LL),
+			className: undefined,
+			icon: 'log-out',
+			action: () => Promise.resolve(authNavActions.signout())
+		};
+		const disconnectItem: MenuItem = { label: t('navbar.disconnect', $LL), className: undefined, icon: undefined, action: () => Promise.resolve(authNavActions.disconnect()) };
+		const dashboardItem: MenuItem | null = session?.user ? { label: t('content.dashboard.heading', $LL), to: '/dashboard', className: undefined, icon: undefined, action: () => goto('/dashboard') } : null;
+		const items: MenuItem[] = [...(dashboardItem ? [dashboardItem] : []), ...authMenuItems];
 		if (authEnabled && web3Enabled && $walletAddress) items.push(disconnectItem);
-		if (session?.user) items.push(logoutItem);
+		if (session?.user && !authItems.some((item) => item.action === 'signout' || item.action === 'logout')) items.push(logoutItem);
 		return items;
 	});
 
 	const handleSelect = (event: CustomEvent<{ label: string; action?: () => void }>) => {
 		if (event.detail.action) {
 			event.detail.action();
+		}
+		closeMenu();
+	};
+
+	const navigateMenuItem = (item: { to?: string; href?: string; target?: string }) => {
+		if (item.to) {
+			if (!item.target || item.target === '_self') {
+				void goto(item.to);
+				return;
+			}
+			window.open(item.to, item.target);
+			return;
+		}
+		if (item.href) {
+			window.open(item.href, item.target || '_self');
 		}
 	};
 
@@ -420,17 +449,12 @@
 											orientation={orientation}
 											onback={() => {}}
 											onselect={(item: any) => {
-												if (item.href) {
-													const rel = item.rel || 'noopener';
-													window.open(item.href, item.target || '_self', rel);
-												} else if (item.to) {
-													window.location.href = item.to;
-												}
+												navigateMenuItem(item);
 											}}
 											theme={style}
 										/>
 									{:else if to}
-										<a href={to} class="group {style === 'auto' ? 'text-white! hover:text-slate-300! dark:text-slate-900! dark:hover:text-slate-600!' : style === 'transparent' ? 'text-slate-900! hover:text-slate-600! dark:text-white! dark:hover:text-slate-300!' : 'text-white! hover:text-slate-300!'} font-medium text-base flex items-center gap-1.5 cursor-pointer transition-colors duration-200 {orientation === 'vertical' ? 'w-full justify-start px-4 py-2' : ''} {className ?? ''}">
+										<a href={to} target={target ? target : undefined} rel={rel ? rel : undefined} class="group {style === 'auto' ? 'text-white! hover:text-slate-300! dark:text-slate-900! dark:hover:text-slate-600!' : style === 'transparent' ? 'text-slate-900! hover:text-slate-600! dark:text-white! dark:hover:text-slate-300!' : 'text-white! hover:text-slate-300!'} font-medium text-base flex items-center gap-1.5 cursor-pointer transition-colors duration-200 {orientation === 'vertical' ? 'w-full justify-start px-4 py-2' : ''} {className ?? ''}">
 											{#if icon}
 												{#if typeof icon === 'string' && (icon.startsWith('http') || icon.startsWith('/'))}
 													<img src={icon} alt="" class="h-5 w-5 shrink-0" />
@@ -523,17 +547,12 @@
 											orientation={orientation}
 											onback={() => {}}
 											onselect={(item: any) => {
-												if (item.href) {
-													const rel = item.rel || 'noopener';
-													window.open(item.href, item.target || '_self', rel);
-												} else if (item.to) {
-													window.location.href = item.to;
-												}
+												navigateMenuItem(item);
 											}}
 											theme={style}
 										/>
 									{:else if to}
-										<a href={to} class="group {style === 'auto' ? 'text-white! hover:text-slate-300! dark:text-slate-900! dark:hover:text-slate-600!' : style === 'transparent' ? 'text-slate-900! hover:text-slate-600! dark:text-white! dark:hover:text-slate-300!' : 'text-white! hover:text-slate-300!'} font-medium text-base flex items-center gap-1.5 cursor-pointer transition-colors duration-200 {className ?? ''}">
+										<a href={to} target={target ? target : undefined} rel={rel ? rel : undefined} class="group {style === 'auto' ? 'text-white! hover:text-slate-300! dark:text-slate-900! dark:hover:text-slate-600!' : style === 'transparent' ? 'text-slate-900! hover:text-slate-600! dark:text-white! dark:hover:text-slate-300!' : 'text-white! hover:text-slate-300!'} font-medium text-base flex items-center gap-1.5 cursor-pointer transition-colors duration-200 {className ?? ''}">
 													{#if icon}
 														{#if typeof icon === 'string' && (icon.startsWith('http') || icon.startsWith('/'))}
 															<img src={icon} alt="" class="h-5 w-5 shrink-0" />
@@ -691,17 +710,12 @@
 										iconExternal={iconExternal}
 										onback={() => {}}
 										onselect={(item: any) => {
-											if (item.href) {
-												const rel = item.rel || 'noopener';
-												window.open(item.href, item.target || '_self', rel);
-											} else if (item.to) {
-												window.location.href = item.to;
-											}
+											navigateMenuItem(item);
 											closeMenu();
 										}}
 									/>
 								{:else if to}
-									<a href={to} onclick={closeMenu} class="flex w-full items-center justify-center gap-2 px-4 py-8 text-center text-white! transition-colors duration-200 hover:text-indigo-400!">
+									<a href={to} target={target ? target : undefined} rel={rel ? rel : undefined} onclick={closeMenu} class="flex w-full items-center justify-center gap-2 px-4 py-8 text-center text-white! transition-colors duration-200 hover:text-indigo-400!">
 										{#if icon}
 											{#if typeof icon === 'string' && (icon.startsWith('http') || icon.startsWith('/'))}
 												<img src={icon} alt="" class="h-5 w-5 shrink-0" />
@@ -770,7 +784,7 @@
 						{/each}
 
 						{#if authEnabled && isLoggedIn}
-							<li class="flex justify-center w-full border-b border-slate-600/30 relative">
+							<li class="flex justify-center w-full border-b border-slate-600/30">
 								<ActionsDropdown
 									title={userDropdownTitle}
 									formatKind={userDropdownFormatKind}
@@ -782,6 +796,7 @@
 									{iconExternal}
 									theme={style}
 									onChange={handleSelect}
+									onItemSelect={closeMenu}
 									className="w-full py-8"
 								/>
 							</li>
