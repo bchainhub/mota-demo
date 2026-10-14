@@ -1,13 +1,13 @@
 /**
  * Server-only module loader. Loads auth submodules via server.ts (exports authHandle)
- * so that $env/dynamic/private and other server-only code never get into the client bundle.
+ * so that $app/env/private and other server-only code never get into the client bundle.
  * Use this in hooks.server.ts for the primary auth handle.
  */
 
 import type { ModuleName } from './modules';
 import { getModuleRoute, isModuleEnabled } from './modules';
 
-const authServerLoaders = import.meta.glob<Record<string, unknown>>('$modules/auth/**/server.ts');
+const authServerLoaders = import.meta.glob<Record<string, unknown>>('#modules/auth/**/server.ts');
 
 export async function loadAuthModuleServer(module: ModuleName): Promise<unknown | null> {
 	if (!isModuleEnabled(module)) return null;
@@ -16,7 +16,7 @@ export async function loadAuthModuleServer(module: ModuleName): Promise<unknown 
 	const route = getModuleRoute(module);
 	if (!route) return null;
 	const key = `${route}/server.ts`;
-	const suffix = route.replace(/^\$modules\/?/, '') + '/server.ts';
+	const suffix = route.replace(/^#modules\/?/, '') + '/server.ts';
 	let loader: (() => Promise<Record<string, unknown>>) | undefined = authServerLoaders[key];
 	if (typeof loader !== 'function') {
 		const found = Object.entries(authServerLoaders).find(

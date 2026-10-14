@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { ArrowRight, House, CircleAlert, MessageCircleQuestionMark, LifeBuoy } from '@lucide/svelte';
 	import { page } from '$app/state';
-	import { getSiteConfig } from '$lib/helpers/siteConfig';
+	import { getSiteConfig } from '#lib/helpers/siteConfig.js';
 
-	export const data = {};
-	export let error: Error | null = null;
+	const error = $derived(page.error);
 	const _cfg = getSiteConfig();
 	const supportLink = _cfg?.url ? `mailto:support@${new URL(_cfg.url as string).hostname}` : undefined;
 	const organizationName = (_cfg?.organizationName as string) ?? '';
 	const projectName = (_cfg?.projectName as string) ?? '';
 	const communityUrl = `https://github.com/${organizationName}/${projectName}`;
-	$: status = page.status;
+	const status = $derived(page.status);
 
 	// Navigation items for different error scenarios
 	const getNavigations = () => {
@@ -95,7 +94,7 @@
 							<div
 								class="flex-none w-14 h-14 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-600 dark:text-gray-300 flex items-center justify-center"
 							>
-								<svelte:component this={item.icon} class="w-6 h-6" />
+								<item.icon class="w-6 h-6" />
 							</div>
 							<div class="space-y-1">
 								<h4 class="text-gray-800 dark:text-gray-100 font-medium">{item.title}</h4>

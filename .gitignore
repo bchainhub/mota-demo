@@ -22,6 +22,9 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 /bin/
+# AI Agents
+/.agents/
+/skills-lock.json
 
 # Extra ignores
 ._*
