@@ -32,7 +32,10 @@
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*",
 		"#data": "./src/data/index.js",
-		"#data/*": "./src/data/*"
+		"#data/*": "./src/data/*",
+		"#components": "./src/lib/components/index.js",
+		"#components/*": "./src/lib/components/*",
+		"#modules/*": "./src/lib/modules/*"
 	},
 	"dependencies": {
 		"@blockchainhub/blo": "^1.2.7",

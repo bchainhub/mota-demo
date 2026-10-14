@@ -1,7 +1,5 @@
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -9,9 +7,6 @@ import type { Config } from 'vite-plugin-config';
 import tailwindcss from '@tailwindcss/vite';
 
 declare const process: { env: Record<string, string | undefined> };
-
-/** Legacy addon aliases, paired with compilerOptions.paths in tsconfig.json. */
-const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 // Language configuration: availableLocales as locale codes; names are read from each locale's language.descriptiveName in src/i18n
 const languageConfig = {
@@ -126,14 +121,6 @@ const siteConfigClient: Config = {
 };
 
 export default defineConfig({
-	resolve: {
-		alias: {
-			$lib: path.resolve(projectRoot, 'src/lib'),
-			$components: path.resolve(projectRoot, 'src/lib/components'),
-			$data: path.resolve(projectRoot, 'src/data'),
-			$modules: path.resolve(projectRoot, 'src/lib/modules')
-		}
-	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({
