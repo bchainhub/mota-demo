@@ -1,3 +1,5 @@
+import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -8,7 +10,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 declare const process: { env: Record<string, string | undefined> };
 
-/** Project root (vite.config.ts directory). Duplicates kit.alias so Vite/SSR resolves `$components/*` etc. reliably. */
+/** Legacy addon aliases, paired with compilerOptions.paths in tsconfig.json. */
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 // Language configuration: availableLocales as locale codes; names are read from each locale's language.descriptiveName in src/i18n
@@ -126,6 +128,7 @@ const siteConfigClient: Config = {
 export default defineConfig({
 	resolve: {
 		alias: {
+			$lib: path.resolve(projectRoot, 'src/lib'),
 			$components: path.resolve(projectRoot, 'src/lib/components'),
 			$data: path.resolve(projectRoot, 'src/data'),
 			$modules: path.resolve(projectRoot, 'src/lib/modules')
@@ -133,11 +136,20 @@ export default defineConfig({
 	},
 	plugins: [
 		tailwindcss(),
-		sveltekit(),
+		sveltekit({
+			preprocess: vitePreprocess(),
+			adapter: adapter()
+		}),
 		VitePWA({
 			registerType: 'autoUpdate',
+			outDir: '.svelte-kit/output/client',
+			injectRegister: false,
 			includeAssets: ['img/icons/favicon.svg', 'robots.txt', 'img/icons/apple-touch-icon.png'],
 			workbox: {
+				globPatterns: ['_app/immutable/**/*.{js,css,wasm}'],
+				cleanupOutdatedCaches: true,
+				skipWaiting: true,
+				clientsClaim: true,
 				// SvelteKit does not output index.html in precache; disable default fallback to avoid "non-precached-url" error.
 				navigateFallback: null
 			},
@@ -165,11 +177,21 @@ export default defineConfig({
 					}
 				]
 			}
+		}).map((plugin) => {
+			// SvelteKit renders app.html itself; manifest and registration are handled
+			// by app.html and +layout.svelte rather than Vite's HTML pipeline.
+			delete plugin.transformIndexHtml;
+			if (plugin.name === 'vite-plugin-pwa:build') {
+				// Kit 3 builds server and client environments separately. Generate the
+				// service worker only after the client assets have been written.
+				plugin.applyToEnvironment = (environment) => environment.name === 'client';
+			}
+			return plugin;
 		})
 	],
 	define: {
 		__SITE_CONFIG__: JSON.stringify(siteConfigClient),
-		'import.meta.env.DEV': process.env.DEV_MODE === '1'
+		__DEV_MODE__: process.env.DEV_MODE === '1'
 	},
 	ssr: {
 		noExternal: ['@lucide/svelte']

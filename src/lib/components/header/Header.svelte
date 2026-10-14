@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
 	import { ArrowUpLeft, ArrowUpRight, Eclipse, Menu, Moon, Sun, X } from '@lucide/svelte';
 	import { ActionsDropdown, Icon, LanguageSwitcher, LanguageSwitcherCompact, Submenu, SubmenuCompact } from '$components';
-	import { asDynamicIcon } from '$lib/helpers/icon';
-	import { LL, locale as localeStore } from '$lib/helpers/i18n';
-	import { t, getAvailableLocalesWithNamesAsync, applyLocale } from '$lib/helpers/i18n';
+	import { asDynamicIcon } from '#lib/helpers/icon.js';
+	import { LL, locale as localeStore } from '#lib/helpers/i18n.js';
+	import { t, getAvailableLocalesWithNamesAsync, applyLocale } from '#lib/helpers/i18n.js';
 	import { walletAddress, walletType, autoLogin, shouldAutoConnect, initPostInstallWalletAction, isCoreEcosystem } from '$modules/auth/web3';
-	import type { ShortFormatKind } from '$lib/helpers/shortFormat';
+	import type { ShortFormatKind } from '#lib/helpers/shortFormat.js';
 	import { goto } from '$app/navigation';
 	import {
 		getAuthNavActions,
@@ -19,10 +19,10 @@
 		getAuthItemsFromConfig,
 		getNavbarItemsFromConfig
 	} from '$modules/auth/nav-actions';
-	import { filterNavItemsByAuth } from '$lib/helpers/nav';
-	import { evaluateShowRule } from '$lib/helpers/showRule';
-	import { getStoredTheme, setStoredTheme, removeStoredTheme } from '$lib/helpers/storageKeys';
-	import { getSiteConfig, getSiteTitleParts } from '$lib/helpers/siteConfig';
+	import { filterNavItemsByAuth } from '#lib/helpers/nav.js';
+	import { evaluateShowRule } from '#lib/helpers/showRule.js';
+	import { getStoredTheme, setStoredTheme, removeStoredTheme } from '#lib/helpers/storageKeys.js';
+	import { getSiteConfig, getSiteTitleParts } from '#lib/helpers/siteConfig.js';
 
 	const { layoutData, session: sessionProp = undefined }: { layoutData?: Record<string, unknown>; session?: App.Locals['session'] } = $props();
 
@@ -62,6 +62,7 @@
 	const web3Enabled = Array.isArray(authStrategy) ? authStrategy.includes('web3') : authStrategy === 'web3';
 
 	let isOpen = $state(false);
+	let headerHeight = $state(0);
 	let dropdownOpen = $state(false);
 	let theme = $state(respectPrefersColorScheme
 		? 'system'
@@ -100,7 +101,7 @@
 	});
 
 	const visibleItems = $derived(
-		filterNavItemsByAuth(items as import('$lib/helpers/nav').ItemWithShow[], showContext, authEnabled) as NavbarItem[]
+		filterNavItemsByAuth(items as import('#lib/helpers/nav.js').ItemWithShow[], showContext, authEnabled) as NavbarItem[]
 	);
 
 	/** Display label for the user dropdown: wallet, Core ID, or passkey user fields. */
@@ -154,16 +155,19 @@
 		const authItems = getAuthItemsFromConfig().filter(
 			(item) => evaluateShowRule(item.show, ctx)
 		);
-		const authMenuItems: MenuItem[] = authItems.map((item) => ({
-			label: item.label ? t(item.label, $LL) : '',
-			to: item.to,
-			href: item.href,
-			target: item.target as MenuItem['target'],
-			rel: item.rel,
-			className: item.className,
-			icon: item.icon,
-			action: item.action ? () => Promise.resolve(resolveAuthNavAction(item.action, authNavActions)?.()) : undefined
-		}));
+		const authMenuItems: MenuItem[] = authItems.map((item) => {
+			const action = resolveAuthNavAction(item.action ?? '', authNavActions);
+			return {
+				label: item.label ? t(item.label, $LL) : '',
+				to: item.to,
+				href: item.href,
+				target: item.target as MenuItem['target'],
+				rel: item.rel,
+				className: item.className,
+				icon: item.icon,
+				action: action ? () => Promise.resolve(action()) : undefined
+			};
+		});
 		const logoutItem: MenuItem = {
 			label: t('common.logout', $LL),
 			className: undefined,
@@ -398,9 +402,10 @@
 </script>
 
 <header
+	bind:clientHeight={headerHeight}
 	class={`site-header fixed top-8 left-0 right-0 z-50 w-full flex justify-center max-lg:justify-stretch lg:px-8 navigation ${style === 'transparent' ? 'transparent' : ''} ${orientation === 'vertical' ? 'vertical lg:mr-4 lg:static lg:top-auto lg:left-auto lg:right-auto lg:w-full' : 'horizontal'} ${orientation === 'vertical' && hideOnScroll ? 'transition-[transform,opacity] duration-300 ease-in-out' : 'transition-opacity duration-300 ease-in-out'} ${orientation === 'vertical' && hideOnScroll ? (!headerVisible ? '-translate-x-full opacity-0 pointer-events-none' : 'opacity-100') : (!headerVisible && hideOnScroll ? 'opacity-0' : 'opacity-100')}`}
 >
-	<div class={`nav-container w-full max-w-full min-w-0 flex items-center lg:container lg:mx-3 p-3 lg:rounded-xl relative z-50 ${style === 'transparent' ? 'transparent' : style === 'blur' ? 'bg-slate-900/80 backdrop-blur-md border border-slate-700/50' : style === 'auto' ? 'bg-slate-900/90 border border-slate-700/50 dark:bg-slate-200/90 dark:border dark:border-slate-400/50' : 'bg-slate-900/90 border border-slate-700/50'} ${orientation === 'vertical' ? 'lg:mt-8' : 'lg:mt-6'} ${orientation === 'vertical' ? 'lg:flex-col lg:max-w-[300px] lg:pt-6' : ''}`} style={style === 'blur' ? 'backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);' : ''}>
+	<div class={`nav-container w-full max-w-full min-w-0 flex items-center lg:container lg:mx-3 p-3 max-lg:pt-[calc(0.75rem+env(safe-area-inset-top,0px))] max-lg:pl-[max(0.75rem,env(safe-area-inset-left,0px))] max-lg:pr-[max(0.75rem,env(safe-area-inset-right,0px))] lg:rounded-xl relative z-50 ${style === 'transparent' ? 'transparent' : style === 'blur' ? 'bg-slate-900/80 backdrop-blur-md border border-slate-700/50' : style === 'auto' ? 'bg-slate-900/90 border border-slate-700/50 dark:bg-slate-200/90 dark:border dark:border-slate-400/50' : 'bg-slate-900/90 border border-slate-700/50'} ${orientation === 'vertical' ? 'lg:mt-8' : 'lg:mt-6'} ${orientation === 'vertical' ? 'lg:flex-col lg:max-w-[300px] lg:pt-6' : ''}`} style={style === 'blur' ? 'backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);' : ''}>
 		<div class={`flex flex-1 min-w-0 items-center desktop-menu min-h-12 ${orientation === 'vertical' ? 'lg:flex-col lg:gap-4 lg:pb-6' : ''}`}>
 			{#if logo}
 				<a
@@ -685,7 +690,8 @@
 	{#if isOpen}
 		<nav
 			id="dropdown-menu"
-			class="fixed top-18 left-0 right-0 bottom-0 overflow-hidden lg:hidden bg-gray-800 z-50"
+			class="fixed left-0 right-0 bottom-0 overflow-hidden lg:hidden bg-gray-800 z-50 max-lg:pb-[env(safe-area-inset-bottom,0px)] max-lg:pl-[env(safe-area-inset-left,0px)] max-lg:pr-[env(safe-area-inset-right,0px)]"
+			style:top={`${headerHeight}px`}
 		>
 			<div class="relative overflow-hidden h-full">
 				<!-- Main Menu -->
