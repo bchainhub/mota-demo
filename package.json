@@ -1,54 +1,59 @@
 {
-  "name": "mota-demo",
-  "private": true,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "typesafe-i18n": "typesafe-i18n",
-    "i18n:extract": "typesafe-i18n --no-watch",
-    "i18n:watch": "typesafe-i18n"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-auto": "^8.0.0",
-    "@sveltejs/kit": "^3.0.0",
-    "@sveltejs/vite-plugin-svelte": "^7.3.1",
-    "ejs": "^7.0.1",
-    "hygen": "^6.2.11",
-    "json5": "^2.2.3",
-    "prompts": "^2.4.2",
-    "svelte": "^5.57.2",
-    "svelte-check": "^4.7.6",
-    "tiged": "^2.12.8",
-    "typescript": "~6.0.3",
-    "vite": "^8.3.4"
-  },
-  "imports": {
-    "#lib": "./src/lib/index.js",
-    "#lib/*": "./src/lib/*"
-  },
-  "dependencies": {
-    "@blockchainhub/blo": "^1.2.7",
-    "@blockchainhub/ican": "^0.4.3",
-    "@lucide/svelte": "^1.57.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "blockchain-wallet-validator": "^1.2.1",
-    "device-sherlock": "^0.2.1",
-    "exchange-rounding": "^1.1.8",
-    "payto-rl": "^1.1.7",
-    "tailwindcss": "^4.3.3",
-    "txms.js": "^1.4.0",
-    "typesafe-i18n": "^5.27.1",
-    "vite-plugin-pwa": "^2.0.0",
-    "zod": "^4.6.7"
-  },
-  "bin": {
-    "addon": "./bin/addon.mjs"
-  },
-  "license": "SEE LICENSE IN LICENSE"
+	"name": "mota-demo",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"typesafe-i18n": "typesafe-i18n",
+		"i18n:extract": "typesafe-i18n --no-watch",
+		"i18n:watch": "typesafe-i18n"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^8.0.0",
+		"@sveltejs/kit": "^3.0.0",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
+		"ejs": "^7.0.1",
+		"hygen": "^6.2.11",
+		"json5": "^2.2.3",
+		"prompts": "^2.4.2",
+		"svelte": "^5.57.2",
+		"svelte-check": "^4.7.6",
+		"tiged": "^2.12.8",
+		"typescript": "~6.0.3",
+		"vite": "^8.3.4"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*",
+		"#data": "./src/data/index.js",
+		"#data/*": "./src/data/*"
+	},
+	"dependencies": {
+		"@blockchainhub/blo": "^1.2.7",
+		"@blockchainhub/ican": "^0.4.3",
+		"@lucide/svelte": "^1.57.0",
+		"@tailwindcss/vite": "^4.3.3",
+		"blockchain-wallet-validator": "^1.2.1",
+		"device-sherlock": "^0.2.1",
+		"exchange-rounding": "^1.1.8",
+		"payto-rl": "^1.1.7",
+		"tailwindcss": "^4.3.3",
+		"txms.js": "^1.4.0",
+		"typesafe-i18n": "^5.27.1",
+		"vite-plugin-pwa": "^2.0.0",
+		"zod": "^4.6.7"
+	},
+	"bin": {
+		"addon": "./bin/addon.mjs"
+	},
+	"license": "SEE LICENSE IN LICENSE",
+	"engines": {
+		"node": ">=22.17.0"
+	}
 }
