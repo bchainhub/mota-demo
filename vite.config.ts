@@ -50,6 +50,14 @@ const siteConfigClient: Config = {
 					icon: 'house'
 				},
 				{
+					label: 'navbar.connect',
+					action: 'manualConnect',
+					// Desktop outline only; the hamburger menu renders its own plain action.
+					className: "lg:relative lg:isolate lg:rounded-full lg:px-5 lg:py-2 lg:before:pointer-events-none lg:before:absolute lg:before:inset-0 lg:before:-z-10 lg:before:rounded-full lg:before:p-[2px] lg:before:content-[''] lg:before:bg-linear-to-br lg:before:from-green-400 lg:before:to-green-900 lg:before:[mask-image:linear-gradient(#fff_0_0),linear-gradient(#fff_0_0)] lg:before:[mask-clip:content-box,border-box] lg:before:[mask-composite:exclude] lg:hover:bg-green-500/10 lg:focus-visible:outline-2 lg:focus-visible:outline-offset-4 lg:focus-visible:outline-green-400",
+					position: 'right',
+					show: 'disconnected'
+				},
+				{
 					href: 'https://github.com/bchainhub/dapp-starter',
 					target: '_blank',
 					position: 'right',
@@ -117,7 +125,24 @@ const siteConfigClient: Config = {
 	api: {
 		enabled: false
 	},
-	modules: {}
+	modules: {
+		auth: {
+			enabled: true,
+			strategy: ['web3'],
+			primaryStrategy: 'web3',
+			web3: {
+				provider: 'core',
+				discovery: 'cip6963',
+				blockchain: 'Core',
+				methods: {
+					requestAccounts: 'xcb_requestAccounts',
+					accounts: 'xcb_accounts',
+					chainId: 'xcb_chainId'
+				},
+				ipfsGateway: 'https://ipf.sk/ipfs/'
+			}
+		}
+	}
 };
 
 export default defineConfig({
